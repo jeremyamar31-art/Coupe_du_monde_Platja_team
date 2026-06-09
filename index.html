@@ -1,29 +1,109 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Coupe du Monde - Paris entre amis</title>
-  <link rel="stylesheet" href="style.css">
+<style>
+body {
+  font-family: 'Inter', sans-serif;
+  background: #0b1220;
+  color: #ffffff;
+  margin: 0;
+  padding: 20px;
+}
 
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-</head>
+/* TITRE */
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #00d4ff;
+}
 
-<body>
-  <h1>🏆 Coupe du Monde 2026 - Paris entre amis</h1>
+/* SECTIONS */
+h2 {
+  margin-top: 30px;
+  color: #ffffff;
+  border-left: 4px solid #00d4ff;
+  padding-left: 10px;
+}
 
-  <div id="podium"></div>
+/* PODIUM / RANKING */
+#ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
 
-  <h2>Classement</h2>
-  <div id="ranking"></div>
+#ranking p {
+  background: #121a2b;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
 
-  <h2>Tableau des journées</h2>
-  <div id="table"></div>
+/* TABLEAU SCROLL */
+#table {
+  overflow-x: auto;
+  margin-top: 10px;
+}
 
-  <h2>Évolution</h2>
-  <canvas id="chart"></canvas>
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  background: #121a2b;
+  border-radius: 10px;
+  overflow: hidden;
+}
 
-  <script src="firebase.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+th {
+  background: #1a2740;
+  padding: 10px;
+  font-size: 12px;
+  text-align: center;
+}
+
+td {
+  padding: 8px;
+  text-align: center;
+  border-top: 1px solid #1f2a44;
+}
+
+/* INPUT */
+input {
+  width: 50px;
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
+  text-align: center;
+}
+
+/* BUTTON */
+button {
+  margin-left: 5px;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #2b3a55;
+  color: white;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #00d4ff;
+  color: black;
+}
+
+/* PODIUM EFFECT */
+#ranking p:nth-child(1) {
+  border-left: 5px solid gold;
+}
+#ranking p:nth-child(2) {
+  border-left: 5px solid silver;
+}
+#ranking p:nth-child(3) {
+  border-left: 5px solid #cd7f32;
+}
+</style>
