@@ -41,7 +41,7 @@ const matchCalendar = [
 ];
 
 /* =========================
-   🔁 UPDATE (FIXÉ)
+   🔁 UPDATE
    ========================= */
 function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
@@ -54,7 +54,7 @@ function update(player, day) {
 }
 
 /* =========================
-   💰 CALCUL (CORRIGÉ)
+   💰 CALCUL STABLE
    ========================= */
 function compute(data) {
   const result = {};
@@ -74,6 +74,59 @@ function compute(data) {
 }
 
 /* =========================
+   📈 COURBE D’ÉVOLUTION
+   ========================= */
+let chart;
+
+function renderChart(data) {
+  const days = matchCalendar.map(m => m.date);
+
+  const datasets = players.map(p => ({
+    label: p,
+    data: days.map((_, i) => {
+      let value = startCapital;
+
+      for (let j = 0; j <= i; j++) {
+        const day = data[days[j]];
+        if (!day) continue;
+
+        const d = day[p];
+        if (!d) continue;
+
+        value -= stake;
+        value += Number(d.value ?? 0);
+      }
+
+      return value;
+    }),
+    borderWidth: 2,
+    tension: 0.3
+  }));
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+      labels: days.map(d =>
+        new Date(d).toLocaleDateString("fr-FR")
+      ),
+      datasets
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "white" } }
+      },
+      scales: {
+        x: { ticks: { color: "white" } },
+        y: { ticks: { color: "white" } }
+      }
+    }
+  });
+}
+
+/* =========================
    🎨 RENDER
    ========================= */
 function render(snapshot) {
@@ -85,22 +138,27 @@ function render(snapshot) {
 
   const capital = compute(data);
 
-  /* classement */
+  /* ===== classement ===== */
   document.getElementById("ranking").innerHTML =
     Object.entries(capital)
-      .sort((a,b) => b[1]-a[1])
-      .map(([p,v],i)=>
-        `<p>${i+1}. ${p} : ${v}€</p>`
+      .sort((a, b) => b[1] - a[1])
+      .map(([p, v], i) =>
+        `<p>${i + 1}. ${p} : ${v}€</p>`
       ).join("");
 
-  /* tableau */
+  /* ===== tableau ===== */
   const days = matchCalendar.map(m => m.date);
 
   let html = "<table><tr><th>Joueur</th>";
 
   days.forEach(d => {
     const m = matchCalendar.find(x => x.date === d);
-    html += `<th>${new Date(d).toLocaleDateString("fr-FR")}<br><small>${m.label}</small></th>`;
+
+    html += `
+      <th>
+        ${new Date(d).toLocaleDateString("fr-FR")}
+        <br><small>${m.label}</small>
+      </th>`;
   });
 
   html += "</tr>";
@@ -124,7 +182,12 @@ function render(snapshot) {
   html += "</table>";
 
   document.getElementById("table").innerHTML = html;
+
+  /* ===== COURBE SOUS TABLE ===== */
+  renderChart(data);
 }
 
-/* FIRESTORE */
+/* =========================
+   🔥 FIRESTORE LIVE
+   ========================= */
 db.collection("days").onSnapshot(render);
