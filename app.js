@@ -2,7 +2,47 @@ const players = ["Jérémy", "Ludo", "Quentin", "Xavien", "Vincent"];
 const startCapital = 20;
 const stake = 3;
 
-// update
+/* =========================
+   🏆 CALENDRIER PRO (FIFA-like)
+   ========================= */
+const matchCalendar = [
+  { date: "2026-06-11", label: "Ouverture" },
+  { date: "2026-06-12", label: "Phase de groupes" },
+  { date: "2026-06-13", label: "Phase de groupes" },
+  { date: "2026-06-14", label: "Phase de groupes" },
+  { date: "2026-06-15", label: "Phase de groupes" },
+  { date: "2026-06-16", label: "Phase de groupes" },
+  { date: "2026-06-17", label: "Phase de groupes" },
+  { date: "2026-06-18", label: "Phase de groupes" },
+  { date: "2026-06-19", label: "Phase de groupes" },
+  { date: "2026-06-20", label: "Phase de groupes" },
+  { date: "2026-06-21", label: "Phase de groupes" },
+  { date: "2026-06-22", label: "Phase de groupes" },
+  { date: "2026-06-23", label: "Phase de groupes" },
+  { date: "2026-06-24", label: "Phase de groupes" },
+  { date: "2026-06-25", label: "Phase de groupes" },
+  { date: "2026-06-26", label: "Phase de groupes" },
+
+  { date: "2026-06-27", label: "Huitièmes" },
+  { date: "2026-06-28", label: "Huitièmes" },
+  { date: "2026-06-29", label: "Huitièmes" },
+  { date: "2026-06-30", label: "Huitièmes" },
+
+  { date: "2026-07-03", label: "Quarts" },
+  { date: "2026-07-04", label: "Quarts" },
+  { date: "2026-07-05", label: "Quarts" },
+  { date: "2026-07-06", label: "Quarts" },
+
+  { date: "2026-07-09", label: "Demi-finale" },
+  { date: "2026-07-10", label: "Demi-finale" },
+
+  { date: "2026-07-13", label: "Petite finale" },
+  { date: "2026-07-14", label: "Finale" }
+];
+
+/* =========================
+   🔁 UPDATE
+   ========================= */
 function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
 
@@ -14,7 +54,9 @@ function update(player, day) {
   }, { merge: true });
 }
 
-// calcul capital
+/* =========================
+   💰 CALCUL CAPITAL
+   ========================= */
 function compute(data) {
   const result = {};
   players.forEach(p => result[p] = startCapital);
@@ -32,7 +74,9 @@ function compute(data) {
   return result;
 }
 
-// render
+/* =========================
+   🎨 RENDER
+   ========================= */
 function render(snapshot) {
   const data = {};
 
@@ -42,21 +86,24 @@ function render(snapshot) {
 
   const capital = compute(data);
 
-  // classement
+  /* ===== classement ===== */
   document.getElementById("ranking").innerHTML =
     Object.entries(capital)
-      .sort((a,b) => b[1] - a[1])
-      .map(([p,v],i) =>
-        `<p>${i+1}. ${p} : ${v}€</p>`
+      .sort((a, b) => b[1] - a[1])
+      .map(([p, v], i) =>
+        `<p>${i + 1}. ${p} : ${v}€</p>`
       ).join("");
 
-  const days = Object.keys(data).sort();
+  /* ===== colonnes calendrier ===== */
+  const days = matchCalendar.map(m => m.date);
 
-  // tableau
   let html = "<table border='1'><tr><th>Joueur</th>";
 
   days.forEach(d => {
-    html += `<th>${d}</th>`;
+    const label = matchCalendar.find(m => m.date === d)?.label || "";
+    const formatted = new Date(d).toLocaleDateString("fr-FR");
+
+    html += `<th>${formatted}<br><small>${label}</small></th>`;
   });
 
   html += "</tr>";
@@ -83,5 +130,7 @@ function render(snapshot) {
   document.getElementById("table").innerHTML = html;
 }
 
-// realtime
+/* =========================
+   🔥 REALTIME FIRESTORE
+   ========================= */
 db.collection("days").onSnapshot(render);
