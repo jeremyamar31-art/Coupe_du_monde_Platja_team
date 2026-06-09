@@ -47,14 +47,12 @@ function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
 
   db.collection("days").doc(day).set({
-    [player]: {
-      value: Number(val)
-    }
+    [player]: { value: Number(val) }
   }, { merge: true });
 }
 
 /* =========================
-   💰 CALCUL STABLE
+   💰 CALCUL
    ========================= */
 function compute(data) {
   const result = {};
@@ -74,20 +72,28 @@ function compute(data) {
 }
 
 /* =========================
-   📈 COURBE D’ÉVOLUTION
+   📈 COURBE (MODIFIÉE)
    ========================= */
 let chart;
 
+function getCompletedDays(data) {
+  return Object.keys(data)
+    .filter(day => data[day])              // existant
+    .sort();                               // chronologique
+}
+
 function renderChart(data) {
-  const days = matchCalendar.map(m => m.date);
+
+  const completedDays = getCompletedDays(data);
 
   const datasets = players.map(p => ({
     label: p,
-    data: days.map((_, i) => {
+    data: completedDays.map((_, i) => {
+
       let value = startCapital;
 
       for (let j = 0; j <= i; j++) {
-        const day = data[days[j]];
+        const day = data[completedDays[j]];
         if (!day) continue;
 
         const d = day[p];
@@ -108,7 +114,7 @@ function renderChart(data) {
   chart = new Chart(document.getElementById("chart"), {
     type: "line",
     data: {
-      labels: days.map(d =>
+      labels: completedDays.map(d =>
         new Date(d).toLocaleDateString("fr-FR")
       ),
       datasets
@@ -183,7 +189,7 @@ function render(snapshot) {
 
   document.getElementById("table").innerHTML = html;
 
-  /* ===== COURBE SOUS TABLE ===== */
+  /* ===== COURBE ===== */
   renderChart(data);
 }
 
