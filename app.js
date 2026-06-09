@@ -3,7 +3,7 @@ const startCapital = 20;
 const stake = 3;
 
 /* =========================
-   🏆 CALENDRIER PRO (FIFA-like)
+   🏆 CALENDRIER
    ========================= */
 const matchCalendar = [
   { date: "2026-06-11", label: "Ouverture" },
@@ -41,21 +41,20 @@ const matchCalendar = [
 ];
 
 /* =========================
-   🔁 UPDATE
+   🔁 UPDATE (FIXÉ)
    ========================= */
 function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
 
   db.collection("days").doc(day).set({
     [player]: {
-      value: Number(val),
-      participated: true
+      value: Number(val)
     }
   }, { merge: true });
 }
 
 /* =========================
-   💰 CALCUL CAPITAL
+   💰 CALCUL (CORRIGÉ)
    ========================= */
 function compute(data) {
   const result = {};
@@ -66,8 +65,8 @@ function compute(data) {
       const d = day?.[p];
       if (!d) return;
 
-      if (d.participated) result[p] -= stake;
-      result[p] += Number(d.value || 0);
+      result[p] -= stake;
+      result[p] += Number(d.value ?? 0);
     });
   });
 
@@ -86,24 +85,22 @@ function render(snapshot) {
 
   const capital = compute(data);
 
-  /* ===== classement ===== */
+  /* classement */
   document.getElementById("ranking").innerHTML =
     Object.entries(capital)
-      .sort((a, b) => b[1] - a[1])
-      .map(([p, v], i) =>
-        `<p>${i + 1}. ${p} : ${v}€</p>`
+      .sort((a,b) => b[1]-a[1])
+      .map(([p,v],i)=>
+        `<p>${i+1}. ${p} : ${v}€</p>`
       ).join("");
 
-  /* ===== colonnes calendrier ===== */
+  /* tableau */
   const days = matchCalendar.map(m => m.date);
 
-  let html = "<table border='1'><tr><th>Joueur</th>";
+  let html = "<table><tr><th>Joueur</th>";
 
   days.forEach(d => {
-    const label = matchCalendar.find(m => m.date === d)?.label || "";
-    const formatted = new Date(d).toLocaleDateString("fr-FR");
-
-    html += `<th>${formatted}<br><small>${label}</small></th>`;
+    const m = matchCalendar.find(x => x.date === d);
+    html += `<th>${new Date(d).toLocaleDateString("fr-FR")}<br><small>${m.label}</small></th>`;
   });
 
   html += "</tr>";
@@ -113,12 +110,11 @@ function render(snapshot) {
 
     days.forEach(d => {
       const val = data[d]?.[p]?.value ?? "";
-      const part = data[d]?.[p]?.participated ? "✓" : "✗";
 
       html += `
         <td>
           <input type="number" id="${p}-${d}" value="${val}">
-          <button onclick="update('${p}','${d}')">${part}</button>
+          <button onclick="update('${p}','${d}')">✓</button>
         </td>`;
     });
 
@@ -130,7 +126,5 @@ function render(snapshot) {
   document.getElementById("table").innerHTML = html;
 }
 
-/* =========================
-   🔥 REALTIME FIRESTORE
-   ========================= */
+/* FIRESTORE */
 db.collection("days").onSnapshot(render);
