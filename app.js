@@ -22,22 +22,29 @@ const matchCalendar = [
   { date: "2026-06-24", label: "Phase de groupes" },
   { date: "2026-06-25", label: "Phase de groupes" },
   { date: "2026-06-26", label: "Phase de groupes" },
+  { date: "2026-06-27", label: "Phase de groupes" },
+   
+  { date: "2026-06-28", label: "Seizième" },
+  { date: "2026-06-29", label: "Seizième" },
+  { date: "2026-06-30", label: "Seizième" },
+  { date: "2026-07-01", label: "Seizième" },
+  { date: "2026-07-02", label: "Seizième" },
+  { date: "2026-07-03", label: "Seizième" },
 
-  { date: "2026-06-27", label: "Huitièmes" },
-  { date: "2026-06-28", label: "Huitièmes" },
-  { date: "2026-06-29", label: "Huitièmes" },
-  { date: "2026-06-30", label: "Huitièmes" },
+  { date: "2026-07-04", label: "Huitième" },
+  { date: "2026-07-05", label: "Huitième" },
+  { date: "2026-07-06", label: "Huitième" },   
+  { date: "2026-07-07", label: "Huitième" },   
+   
+  { date: "2026-07-09", label: "Quarts" },
+  { date: "2026-07-10", label: "Quarts" },
+  { date: "2026-07-11", label: "Quarts" },
 
-  { date: "2026-07-03", label: "Quarts" },
-  { date: "2026-07-04", label: "Quarts" },
-  { date: "2026-07-05", label: "Quarts" },
-  { date: "2026-07-06", label: "Quarts" },
+  { date: "2026-07-14", label: "Demi-finale" },
+  { date: "2026-07-15", label: "Demi-finale" },
 
-  { date: "2026-07-09", label: "Demi-finale" },
-  { date: "2026-07-10", label: "Demi-finale" },
-
-  { date: "2026-07-13", label: "Petite finale" },
-  { date: "2026-07-14", label: "Finale" }
+  { date: "2026-07-18", label: "Petite finale" },
+  { date: "2026-07-19", label: "Finale" }
 ];
 
 /* =========================
