@@ -1,4 +1,3 @@
-
 const players = ["Jérémy", "Ludo", "Quentin", "Xavien ou bien", "Vincent Balek"];
 const startCapital = 20;
 const stake = 3;
@@ -61,7 +60,7 @@ function update(player, day) {
 }
 
 /* =========================
-   💬 COMMENTAIRES GLOBALS
+   💬 COMMENTAIRES GLOBAUX
 ========================= */
 function addComment() {
   const input = document.getElementById("commentInput");
@@ -100,7 +99,7 @@ function listenComments() {
 }
 
 /* =========================
-   UPDATE PLAYER COMMENT
+   COMMENTAIRES JOUEURS (FIX IMPORTANT)
 ========================= */
 function updatePlayerComment(player, value) {
   db.collection("playersMeta").doc("main").set({
@@ -109,7 +108,7 @@ function updatePlayerComment(player, value) {
 }
 
 /* =========================
-   COMPUTE SCORE
+   CALCUL
 ========================= */
 function compute(data) {
   const result = {};
@@ -184,7 +183,7 @@ function renderChart(data) {
 }
 
 /* =========================
-   RANKING
+   RANKING (FIX INPUT)
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -194,11 +193,12 @@ function renderRanking(capital) {
         <p>
           <span class="player-name">${p}</span>
           <span class="player-score">${v}€</span>
+
           <input
             class="player-comment"
             value="${playersComments[p] || ''}"
             placeholder="Commentaire..."
-            oninput="updatePlayerComment('${p}', this.value)"
+            onchange="updatePlayerComment('${p}', this.value)"
           />
         </p>
       `).join("");
@@ -258,17 +258,17 @@ function render(snapshot) {
 }
 
 /* =========================
-   INIT FIRESTORE
+   FIRESTORE INIT
 ========================= */
 db.collection("days").onSnapshot(render);
 
 /* =========================
-   INIT COMMENTS
+   COMMENTAIRES GLOBALS INIT
 ========================= */
 listenComments();
 
 /* =========================
-   LOAD PLAYER COMMENTS ONCE
+   LOAD PLAYER COMMENTS
 ========================= */
 db.collection("playersMeta").doc("main")
   .onSnapshot(doc => {
