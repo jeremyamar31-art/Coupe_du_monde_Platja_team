@@ -4,15 +4,12 @@
   <meta charset="UTF-8">
   <title>Coupe du Monde 2026 - Team Platja d'Aro</title>
 
-  <!-- FONT -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- CHART JS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- STYLE -->
   <style>
     body {
       margin:0;
@@ -51,20 +48,54 @@
       margin-bottom:10px;
     }
 
-    /* RANKING */
+    /* ========================= */
+    /* RANKING FIX PROPRE */
+    /* ========================= */
+
+    #ranking {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
     #ranking p {
       background:#0b1220;
       padding:10px;
       border-radius:8px;
+
       display:flex;
-      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    /* bloc gauche (nom + classement) */
+    .player-name {
+      min-width:180px;
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    /* bloc centre (capital) */
+    .player-score {
+      min-width:120px;
+      text-align:right;
       font-weight:600;
     }
 
-    /* TABLE */
-    #table {
-      overflow-x:auto;
+    /* INPUT commentaire (IMPORTANT FIX) */
+    .player-comment {
+      flex:1;
+      min-width:250px;   /* 👈 clé du problème */
+      padding:6px;
+      border-radius:5px;
+      border:none;
     }
+
+    /* ===================== */
+    /* TABLE */
+    /* ===================== */
+
+    #table { overflow-x:auto; }
 
     table {
       width:100%;
@@ -159,25 +190,21 @@
     <div class="subtitle">💰 Le gagnant payera sa tournée!</div>
   </div>
 
-  <!-- RANKING -->
   <div class="card">
     <h2>📊 Classement des joueurs</h2>
     <div id="ranking"></div>
   </div>
 
-  <!-- TABLE -->
   <div class="card">
     <h2>📅 Tableau des journées</h2>
     <div id="table"></div>
   </div>
 
-  <!-- CHART -->
   <div class="card">
     <h2>📈 Évolution des gains</h2>
     <canvas id="chart"></canvas>
   </div>
 
-  <!-- COMMENTS -->
   <div class="card">
     <h2>💬 Commentaires</h2>
 
@@ -189,7 +216,6 @@
     </div>
   </div>
 
-  <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
