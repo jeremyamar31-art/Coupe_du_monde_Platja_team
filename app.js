@@ -4,7 +4,7 @@ const stake = 3;
 
 /* =========================
    🏆 CALENDRIER
-   ========================= */
+========================= */
 const matchCalendar = [
   { date: "2026-06-11", label: "Ouverture" },
   { date: "2026-06-12", label: "Phase de groupes" },
@@ -23,33 +23,28 @@ const matchCalendar = [
   { date: "2026-06-25", label: "Phase de groupes" },
   { date: "2026-06-26", label: "Phase de groupes" },
   { date: "2026-06-27", label: "Phase de groupes" },
-   
   { date: "2026-06-28", label: "Seizième" },
   { date: "2026-06-29", label: "Seizième" },
   { date: "2026-06-30", label: "Seizième" },
   { date: "2026-07-01", label: "Seizième" },
   { date: "2026-07-02", label: "Seizième" },
   { date: "2026-07-03", label: "Seizième" },
-
   { date: "2026-07-04", label: "Huitième" },
   { date: "2026-07-05", label: "Huitième" },
-  { date: "2026-07-06", label: "Huitième" },   
-  { date: "2026-07-07", label: "Huitième" },   
-   
+  { date: "2026-07-06", label: "Huitième" },
+  { date: "2026-07-07", label: "Huitième" },
   { date: "2026-07-09", label: "Quarts" },
   { date: "2026-07-10", label: "Quarts" },
   { date: "2026-07-11", label: "Quarts" },
-
   { date: "2026-07-14", label: "Demi-finale" },
   { date: "2026-07-15", label: "Demi-finale" },
-
   { date: "2026-07-18", label: "Petite finale" },
   { date: "2026-07-19", label: "Finale" }
 ];
 
 /* =========================
-   🔁 UPDATE
-   ========================= */
+   🔁 UPDATE SCORE
+========================= */
 function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
 
@@ -59,8 +54,44 @@ function update(player, day) {
 }
 
 /* =========================
+   💬 COMMENTAIRES
+========================= */
+function addComment() {
+  const text = document.getElementById("commentInput").value;
+  if (!text) return;
+
+  db.collection("comments").add({
+    name: "Anonyme",
+    text,
+    createdAt: Date.now()
+  });
+
+  document.getElementById("commentInput").value = "";
+}
+
+function listenComments() {
+  db.collection("comments")
+    .orderBy("createdAt")
+    .onSnapshot(snapshot => {
+      const container = document.getElementById("comments");
+      container.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const c = doc.data();
+        container.innerHTML += `
+          <div class="comment">
+            <b>${c.name}</b><br>
+            ${c.text}<br>
+            <small>${new Date(c.createdAt).toLocaleString("fr-FR")}</small>
+          </div>
+        `;
+      });
+    });
+}
+
+/* =========================
    💰 CALCUL
-   ========================= */
+========================= */
 function compute(data) {
   const result = {};
   players.forEach(p => result[p] = startCapital);
@@ -79,24 +110,20 @@ function compute(data) {
 }
 
 /* =========================
-   📈 COURBE (MODIFIÉE)
-   ========================= */
+   📈 COURBE LINÉAIRE
+========================= */
 let chart;
 
 function getCompletedDays(data) {
-  return Object.keys(data)
-    .filter(day => data[day])              // existant
-    .sort();                               // chronologique
+  return Object.keys(data).sort();
 }
 
 function renderChart(data) {
-
   const completedDays = getCompletedDays(data);
 
   const datasets = players.map(p => ({
     label: p,
     data: completedDays.map((_, i) => {
-
       let value = startCapital;
 
       for (let j = 0; j <= i; j++) {
@@ -113,7 +140,7 @@ function renderChart(data) {
       return value;
     }),
     borderWidth: 2,
-    tension: 0.3
+    tension: 0   // 👈 LINÉAIRE
   }));
 
   if (chart) chart.destroy();
@@ -140,8 +167,19 @@ function renderChart(data) {
 }
 
 /* =========================
+   🏷️ COMMENTAIRE JOUEURS
+========================= */
+function updatePlayerComment(player, value) {
+  db.collection("playersMeta").doc("main").set({
+    [player]: value
+  }, { merge: true });
+}
+
+let playersComments = {};
+
+/* =========================
    🎨 RENDER
-   ========================= */
+========================= */
 function render(snapshot) {
   const data = {};
 
@@ -151,15 +189,39 @@ function render(snapshot) {
 
   const capital = compute(data);
 
-  /* ===== classement ===== */
+  db.collection("playersMeta").doc("main")
+    .onSnapshot(doc => {
+      playersComments = doc.data() || {};
+      renderRanking(capital);
+    });
+
+  renderTable(data);
+  renderChart(data);
+}
+
+/* =========================
+   🏆 RANKING
+========================= */
+function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
     Object.entries(capital)
       .sort((a, b) => b[1] - a[1])
-      .map(([p, v], i) =>
-        `<p>${i + 1}. ${p} : ${v}€</p>`
-      ).join("");
+      .map(([p, v], i) => `
+        <p>
+          <span>${i + 1}. ${p} : ${v}€</span>
+          <input 
+            value="${playersComments[p] || ''}"
+            placeholder="commentaire"
+            oninput="updatePlayerComment('${p}', this.value)"
+          />
+        </p>
+      `).join("");
+}
 
-  /* ===== tableau ===== */
+/* =========================
+   📅 TABLE
+========================= */
+function renderTable(data) {
   const days = matchCalendar.map(m => m.date);
 
   let html = "<table><tr><th>Joueur</th>";
@@ -195,12 +257,10 @@ function render(snapshot) {
   html += "</table>";
 
   document.getElementById("table").innerHTML = html;
-
-  /* ===== COURBE ===== */
-  renderChart(data);
 }
 
 /* =========================
-   🔥 FIRESTORE LIVE
-   ========================= */
+   🔥 INIT FIRESTORE
+========================= */
 db.collection("days").onSnapshot(render);
+listenComments();
