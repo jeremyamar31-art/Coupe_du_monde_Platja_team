@@ -43,7 +43,13 @@ const matchCalendar = [
 ];
 
 /* =========================
-   🔁 UPDATE SCORE
+   GLOBAL STATE
+========================= */
+let playersComments = {};
+let chart;
+
+/* =========================
+   UPDATE SCORE
 ========================= */
 function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
@@ -54,10 +60,11 @@ function update(player, day) {
 }
 
 /* =========================
-   💬 COMMENTAIRES
+   💬 COMMENTAIRES GLOBALS
 ========================= */
 function addComment() {
-  const text = document.getElementById("commentInput").value;
+  const input = document.getElementById("commentInput");
+  const text = input.value.trim();
   if (!text) return;
 
   db.collection("comments").add({
@@ -66,7 +73,7 @@ function addComment() {
     createdAt: Date.now()
   });
 
-  document.getElementById("commentInput").value = "";
+  input.value = "";
 }
 
 function listenComments() {
@@ -74,6 +81,8 @@ function listenComments() {
     .orderBy("createdAt")
     .onSnapshot(snapshot => {
       const container = document.getElementById("comments");
+      if (!container) return;
+
       container.innerHTML = "";
 
       snapshot.forEach(doc => {
@@ -90,7 +99,16 @@ function listenComments() {
 }
 
 /* =========================
-   💰 CALCUL
+   UPDATE PLAYER COMMENT
+========================= */
+function updatePlayerComment(player, value) {
+  db.collection("playersMeta").doc("main").set({
+    [player]: value
+  }, { merge: true });
+}
+
+/* =========================
+   COMPUTE SCORE
 ========================= */
 function compute(data) {
   const result = {};
@@ -110,10 +128,8 @@ function compute(data) {
 }
 
 /* =========================
-   📈 COURBE LINÉAIRE
+   COURBE LINÉAIRE
 ========================= */
-let chart;
-
 function getCompletedDays(data) {
   return Object.keys(data).sort();
 }
@@ -140,7 +156,7 @@ function renderChart(data) {
       return value;
     }),
     borderWidth: 2,
-    tension: 0   // 👈 LINÉAIRE
+    tension: 0
   }));
 
   if (chart) chart.destroy();
@@ -167,51 +183,20 @@ function renderChart(data) {
 }
 
 /* =========================
-   🏷️ COMMENTAIRE JOUEURS
-========================= */
-function updatePlayerComment(player, value) {
-  db.collection("playersMeta").doc("main").set({
-    [player]: value
-  }, { merge: true });
-}
-
-let playersComments = {};
-
-/* =========================
-   🎨 RENDER
-========================= */
-function render(snapshot) {
-  const data = {};
-
-  snapshot.forEach(doc => {
-    data[doc.id] = doc.data();
-  });
-
-  const capital = compute(data);
-
-  db.collection("playersMeta").doc("main")
-    .onSnapshot(doc => {
-      playersComments = doc.data() || {};
-      renderRanking(capital);
-    });
-
-  renderTable(data);
-  renderChart(data);
-}
-
-/* =========================
-   🏆 RANKING
+   RANKING
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
     Object.entries(capital)
       .sort((a, b) => b[1] - a[1])
-      .map(([p, v], i) => `
+      .map(([p, v]) => `
         <p>
-          <span>${i + 1}. ${p} : ${v}€</span>
-          <input 
+          <span class="player-name">${p}</span>
+          <span class="player-score">${v}€</span>
+          <input
+            class="player-comment"
             value="${playersComments[p] || ''}"
-            placeholder="commentaire"
+            placeholder="Commentaire..."
             oninput="updatePlayerComment('${p}', this.value)"
           />
         </p>
@@ -219,7 +204,7 @@ function renderRanking(capital) {
 }
 
 /* =========================
-   📅 TABLE
+   TABLE
 ========================= */
 function renderTable(data) {
   const days = matchCalendar.map(m => m.date);
@@ -228,12 +213,7 @@ function renderTable(data) {
 
   days.forEach(d => {
     const m = matchCalendar.find(x => x.date === d);
-
-    html += `
-      <th>
-        ${new Date(d).toLocaleDateString("fr-FR")}
-        <br><small>${m.label}</small>
-      </th>`;
+    html += `<th>${m.label}</th>`;
   });
 
   html += "</tr>";
@@ -260,7 +240,36 @@ function renderTable(data) {
 }
 
 /* =========================
-   🔥 INIT FIRESTORE
+   MAIN RENDER
+========================= */
+function render(snapshot) {
+  const data = {};
+
+  snapshot.forEach(doc => {
+    data[doc.id] = doc.data();
+  });
+
+  const capital = compute(data);
+
+  renderRanking(capital);
+  renderTable(data);
+  renderChart(data);
+}
+
+/* =========================
+   INIT FIRESTORE
 ========================= */
 db.collection("days").onSnapshot(render);
+
+/* =========================
+   INIT COMMENTS
+========================= */
 listenComments();
+
+/* =========================
+   LOAD PLAYER COMMENTS ONCE
+========================= */
+db.collection("playersMeta").doc("main")
+  .onSnapshot(doc => {
+    playersComments = doc.data() || {};
+  });
