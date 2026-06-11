@@ -27,7 +27,7 @@ function moveBall() {
 
 function startGame() {
   score = 0;
-  timeLeft = 30;
+  timeLeft = 15;
   gameActive = true;
 
   scoreDisplay();
