@@ -183,7 +183,21 @@
     }
   </style>
 </head>
+<div class="card">
+  <h2>⚽ Défi Jongles</h2>
 
+  <p>
+    Score : <span id="score">0</span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    Record : <span id="bestScore">0</span>
+  </p>
+
+  <button onclick="resetGame()">Recommencer</button>
+
+  <div id="gameArea">
+    <div id="ball" onclick="hitBall()">⚽</div>
+  </div>
+</div>
 <body>
 
   <div class="header">
@@ -222,6 +236,7 @@
 
   <script src="firebase.js"></script>
   <script src="app.js"></script>
+  <script src="game.js"></script>
 
 </body>
 </html>
