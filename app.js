@@ -99,9 +99,11 @@ function listenComments() {
 }
 
 /* =========================
-   COMMENTAIRES JOUEURS (CORRIGÉ)
+   COMMENTAIRES JOUEURS (FIX FIABLE)
 ========================= */
 function updatePlayerComment(player, value) {
+  if (!value) value = "";
+
   db.collection("playersMeta").doc("main").set({
     [player]: value
   }, { merge: true });
@@ -128,7 +130,7 @@ function compute(data) {
 }
 
 /* =========================
-   COURBE LINÉAIRE
+   COURBE
 ========================= */
 function getCompletedDays(data) {
   return Object.keys(data).sort();
@@ -183,7 +185,7 @@ function renderChart(data) {
 }
 
 /* =========================
-   RANKING (FIX COMMENTAIRE)
+   RANKING (FIX FINAL)
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -258,18 +260,12 @@ function render(snapshot) {
 }
 
 /* =========================
-   FIRESTORE INIT
+   FIRESTORE
 ========================= */
 db.collection("days").onSnapshot(render);
 
-/* =========================
-   INIT COMMENTS
-========================= */
 listenComments();
 
-/* =========================
-   LOAD PLAYER COMMENTS
-========================= */
 db.collection("playersMeta").doc("main")
   .onSnapshot(doc => {
     playersComments = doc.data() || {};
