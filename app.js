@@ -99,7 +99,7 @@ function listenComments() {
 }
 
 /* =========================
-   COMMENTAIRES JOUEURS (FIX IMPORTANT)
+   COMMENTAIRES JOUEURS (CORRIGÉ)
 ========================= */
 function updatePlayerComment(player, value) {
   db.collection("playersMeta").doc("main").set({
@@ -183,7 +183,7 @@ function renderChart(data) {
 }
 
 /* =========================
-   RANKING (FIX INPUT)
+   RANKING (FIX COMMENTAIRE)
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -197,8 +197,8 @@ function renderRanking(capital) {
           <input
             class="player-comment"
             value="${playersComments[p] || ''}"
-            placeholder="Commentaire..."
-            onchange="updatePlayerComment('${p}', this.value)"
+            placeholder="Quoi de beau ?"
+            oninput="updatePlayerComment('${p}', this.value)"
           />
         </p>
       `).join("");
@@ -263,7 +263,7 @@ function render(snapshot) {
 db.collection("days").onSnapshot(render);
 
 /* =========================
-   COMMENTAIRES GLOBALS INIT
+   INIT COMMENTS
 ========================= */
 listenComments();
 
