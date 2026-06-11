@@ -1,37 +1,19 @@
 let score = 0;
 let bestScore = localStorage.getItem("bestScore") || 0;
 
+let timeLeft = 30;
+let gameActive = false;
+let timer;
+
 const scoreDisplay = () => {
   document.getElementById("score").innerText = score;
   document.getElementById("bestScore").innerText = bestScore;
+  document.getElementById("time").innerText = timeLeft;
 };
 
 function moveBall() {
   const gameArea = document.getElementById("gameArea");
   const ball = document.getElementById("ball");
-
-  const maxX = gameArea.clientWidth - 60;
-  const maxY = gameArea.clientHeight - 60;
-
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
-
-  ball.style.left = x + "px";
-  ball.style.top = y + "px";
-}
-
-function hitBall() {
-  score++;
-
-  if (score > bestScore) {
-    bestScore = score;
-    localStorage.setItem("bestScore", bestScore);
-  }
-
-  scoreDisplay();
-
-  const ball = document.getElementById("ball");
-  const gameArea = document.getElementById("gameArea");
 
   const maxX = gameArea.offsetWidth - 60;
   const maxY = gameArea.offsetHeight - 60;
@@ -41,24 +23,60 @@ function hitBall() {
 
   ball.style.left = x + "px";
   ball.style.top = y + "px";
+}
+
+function startGame() {
+  score = 0;
+  timeLeft = 30;
+  gameActive = true;
+
+  scoreDisplay();
+  moveBall();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    scoreDisplay();
+
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+}
+
+function endGame() {
+  gameActive = false;
+  clearInterval(timer);
+
+  if (score > bestScore) {
+    bestScore = score;
+    localStorage.setItem("bestScore", bestScore);
+  }
+
+  alert("⏱️ Fin du jeu ! Ton score : " + score);
+}
+
+function hitBall() {
+  if (!gameActive) return;
+
+  score++;
+
+  moveBall();
+
+  const ball = document.getElementById("ball");
 
   const size = Math.max(35, 60 - score * 0.5);
   ball.style.width = size + "px";
   ball.style.height = size + "px";
+
+  scoreDisplay();
 }
 
 function resetGame() {
-  score = 0;
-
-  const ball = document.getElementById("ball");
-  ball.style.width = "60px";
-  ball.style.height = "60px";
-
-  scoreDisplay();
-  moveBall();
+  clearInterval(timer);
+  startGame();
 }
 
 window.addEventListener("load", () => {
   scoreDisplay();
-  moveBall();
+  startGame();
 });
