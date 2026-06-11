@@ -49,7 +49,7 @@ let playersComments = {};
 let chart;
 
 /* =========================
-   UPDATE SCORE
+   UPDATE SCORE (TABLEAU)
 ========================= */
 function update(player, day) {
   const val = document.getElementById(`${player}-${day}`).value || 0;
@@ -99,13 +99,11 @@ function listenComments() {
 }
 
 /* =========================
-   COMMENTAIRES JOUEURS (FIX ROBUSTE)
+   💬 COMMENTAIRES JOUEURS (MÊME MÉTHODE QUE TABLEAU)
 ========================= */
-function savePlayerComment(player) {
-  const input = document.getElementById(`cmt-${player}`);
-  if (!input) return;
-
-  const value = input.value;
+function updatePlayerComment(player) {
+  const input = document.getElementById(`c-${player}`);
+  const value = input?.value || "";
 
   db.collection("playersMeta").doc("main").set({
     [player]: value
@@ -133,7 +131,7 @@ function compute(data) {
 }
 
 /* =========================
-   CHART
+   COURBE
 ========================= */
 function getCompletedDays(data) {
   return Object.keys(data).sort();
@@ -178,7 +176,7 @@ function renderChart(data) {
 }
 
 /* =========================
-   RANKING (FIX BUTTON)
+   RANKING (FIX IDENTIQUE TABLEAU)
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -190,13 +188,13 @@ function renderRanking(capital) {
           <span class="player-score">${v}€</span>
 
           <input
-            id="cmt-${p}"
+            id="c-${p}"
             class="player-comment"
             value="${playersComments[p] || ''}"
             placeholder="Quoi de beau ?"
           />
 
-          <button onclick="savePlayerComment('${p}')">OK</button>
+          <button onclick="updatePlayerComment('${p}')">✓</button>
         </p>
       `).join("");
 }
@@ -238,6 +236,17 @@ function renderTable(data) {
 }
 
 /* =========================
+   SAVE COMMENT (SIMPLE + FIABLE)
+========================= */
+function updatePlayerComment(player) {
+  const value = document.getElementById(`c-${player}`).value || "";
+
+  db.collection("playersMeta").doc("main").set({
+    [player]: value
+  }, { merge: true });
+}
+
+/* =========================
    MAIN
 ========================= */
 function render(snapshot) {
@@ -255,7 +264,7 @@ function render(snapshot) {
 }
 
 /* =========================
-   FIRESTORE INIT
+   FIRESTORE
 ========================= */
 db.collection("days").onSnapshot(render);
 
