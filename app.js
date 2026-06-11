@@ -1,4 +1,5 @@
-const players = ["Jérémy", "Ludo", "Quentin", "Xavien", "Vincent"];
+
+const players = ["Jérémy", "Ludo", "Quentin", "Xavien ou bien", "Vincent Balek"];
 const startCapital = 20;
 const stake = 3;
 
