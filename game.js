@@ -30,9 +30,17 @@ function hitBall() {
 
   scoreDisplay();
 
-  moveBall();
-
   const ball = document.getElementById("ball");
+  const gameArea = document.getElementById("gameArea");
+
+  const maxX = gameArea.offsetWidth - 60;
+  const maxY = gameArea.offsetHeight - 60;
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  ball.style.left = x + "px";
+  ball.style.top = y + "px";
 
   const size = Math.max(35, 60 - score * 0.5);
   ball.style.width = size + "px";
