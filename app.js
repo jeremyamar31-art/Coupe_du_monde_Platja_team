@@ -99,9 +99,11 @@ function listenComments() {
 }
 
 /* =========================
-   COMMENTAIRES JOUEURS (FIX FIABLE)
+   COMMENTAIRES JOUEURS (ROBUSTE)
 ========================= */
 function updatePlayerComment(player, value) {
+  if (value === undefined) value = "";
+
   return db.collection("playersMeta").doc("main").set({
     [player]: value
   }, { merge: true });
@@ -183,7 +185,7 @@ function renderChart(data) {
 }
 
 /* =========================
-   RANKING (FIX FINAL)
+   RANKING
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -258,7 +260,7 @@ function render(snapshot) {
 }
 
 /* =========================
-   FIRESTORE
+   FIRESTORE INIT
 ========================= */
 db.collection("days").onSnapshot(render);
 
