@@ -1,7 +1,7 @@
 let score = 0;
 let bestScore = localStorage.getItem("bestScore") || 0;
 
-let timeLeft = 30;
+let timeLeft = 15;
 let gameActive = false;
 let timer;
 
