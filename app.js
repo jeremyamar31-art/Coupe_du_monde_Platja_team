@@ -43,7 +43,7 @@ const matchCalendar = [
 ];
 
 /* =========================
-   GLOBAL STATE
+   STATE
 ========================= */
 let playersComments = {};
 let chart;
@@ -99,12 +99,15 @@ function listenComments() {
 }
 
 /* =========================
-   COMMENTAIRES JOUEURS (ROBUSTE)
+   COMMENTAIRES JOUEURS (FIX ROBUSTE)
 ========================= */
-function updatePlayerComment(player, value) {
-  if (value === undefined) value = "";
+function savePlayerComment(player) {
+  const input = document.getElementById(`cmt-${player}`);
+  if (!input) return;
 
-  return db.collection("playersMeta").doc("main").set({
+  const value = input.value;
+
+  db.collection("playersMeta").doc("main").set({
     [player]: value
   }, { merge: true });
 }
@@ -130,7 +133,7 @@ function compute(data) {
 }
 
 /* =========================
-   COURBE
+   CHART
 ========================= */
 function getCompletedDays(data) {
   return Object.keys(data).sort();
@@ -170,22 +173,12 @@ function renderChart(data) {
         new Date(d).toLocaleDateString("fr-FR")
       ),
       datasets
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { labels: { color: "white" } }
-      },
-      scales: {
-        x: { ticks: { color: "white" } },
-        y: { ticks: { color: "white" } }
-      }
     }
   });
 }
 
 /* =========================
-   RANKING
+   RANKING (FIX BUTTON)
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -197,11 +190,13 @@ function renderRanking(capital) {
           <span class="player-score">${v}€</span>
 
           <input
+            id="cmt-${p}"
             class="player-comment"
             value="${playersComments[p] || ''}"
             placeholder="Quoi de beau ?"
-            oninput="updatePlayerComment('${p}', this.value)"
           />
+
+          <button onclick="savePlayerComment('${p}')">OK</button>
         </p>
       `).join("");
 }
@@ -243,7 +238,7 @@ function renderTable(data) {
 }
 
 /* =========================
-   MAIN RENDER
+   MAIN
 ========================= */
 function render(snapshot) {
   const data = {};
