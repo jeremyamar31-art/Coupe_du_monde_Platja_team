@@ -102,9 +102,7 @@ function listenComments() {
    COMMENTAIRES JOUEURS (FIX FIABLE)
 ========================= */
 function updatePlayerComment(player, value) {
-  if (!value) value = "";
-
-  db.collection("playersMeta").doc("main").set({
+  return db.collection("playersMeta").doc("main").set({
     [player]: value
   }, { merge: true });
 }
