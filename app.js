@@ -49,13 +49,27 @@ let playersComments = {};
 let chart;
 
 /* =========================
-   UPDATE SCORE (TABLEAU)
+   SAFE ID
+========================= */
+function safeId(str) {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_]/g, "");
+}
+
+/* =========================
+   UPDATE SCORE
 ========================= */
 function update(player, day) {
-  const val = document.getElementById(`${player}-${day}`).value || 0;
+  const val = document.getElementById(`${safeId(player)}-${day}`).value || 0;
+
+  const num = Number(val);
+  if (isNaN(num)) return;
 
   db.collection("days").doc(day).set({
-    [player]: { value: Number(val) }
+    [player]: { value: num }
   }, { merge: true });
 }
 
@@ -99,11 +113,10 @@ function listenComments() {
 }
 
 /* =========================
-   💬 COMMENTAIRES JOUEURS (MÊME MÉTHODE QUE TABLEAU)
+   💬 COMMENTAIRE JOUEUR (OPTIONNEL CONSERVÉ)
 ========================= */
 function updatePlayerComment(player) {
-  const input = document.getElementById(`c-${player}`);
-  const value = input?.value || "";
+  const value = document.getElementById(`c-${player}`).value || "";
 
   db.collection("playersMeta").doc("main").set({
     [player]: value
@@ -111,7 +124,7 @@ function updatePlayerComment(player) {
 }
 
 /* =========================
-   CALCUL
+   CALCUL CAPITAL
 ========================= */
 function compute(data) {
   const result = {};
@@ -128,6 +141,31 @@ function compute(data) {
   });
 
   return result;
+}
+
+/* =========================
+   HOT PLAYER (DERNIÈRE JOURNÉE)
+========================= */
+function getHotPlayer(data) {
+  const days = Object.keys(data).sort();
+  const lastDay = days[days.length - 1];
+  if (!lastDay) return "-";
+
+  const dayData = data[lastDay];
+  if (!dayData) return "-";
+
+  let bestPlayer = "-";
+  let bestValue = -Infinity;
+
+  players.forEach(p => {
+    const val = dayData?.[p]?.value ?? 0;
+    if (val > bestValue) {
+      bestValue = val;
+      bestPlayer = p;
+    }
+  });
+
+  return bestPlayer;
 }
 
 /* =========================
@@ -176,7 +214,7 @@ function renderChart(data) {
 }
 
 /* =========================
-   RANKING (FIX IDENTIQUE TABLEAU)
+   RANKING
 ========================= */
 function renderRanking(capital) {
   document.getElementById("ranking").innerHTML =
@@ -186,15 +224,6 @@ function renderRanking(capital) {
         <p>
           <span class="player-name">${p}</span>
           <span class="player-score">${v}€</span>
-
-          <input
-            id="c-${p}"
-            class="player-comment"
-            value="${playersComments[p] || ''}"
-            placeholder="Quoi de beau ?"
-          />
-
-          <button onclick="updatePlayerComment('${p}')">✓</button>
         </p>
       `).join("");
 }
@@ -222,7 +251,7 @@ function renderTable(data) {
 
       html += `
         <td>
-          <input type="number" id="${p}-${d}" value="${val}">
+          <input type="number" id="${safeId(p)}-${d}" value="${val}">
           <button onclick="update('${p}','${d}')">✓</button>
         </td>`;
     });
@@ -236,15 +265,22 @@ function renderTable(data) {
 }
 
 /* =========================
-   SAVE COMMENT (SIMPLE + FIABLE)
+   PRONOSTIC DU JOUR (FIREBASE)
 ========================= */
-function updatePlayerComment(player) {
-  const value = document.getElementById(`c-${player}`).value || "";
+function saveDailyBet() {
+  const value = document.getElementById("dailyBetInput").value || "";
 
-  db.collection("playersMeta").doc("main").set({
-    [player]: value
+  db.collection("meta").doc("global").set({
+    dailyBet: value
   }, { merge: true });
 }
+
+db.collection("meta").doc("global")
+  .onSnapshot(doc => {
+    const data = doc.data() || {};
+    const el = document.getElementById("dailyBetInput");
+    if (el) el.value = data.dailyBet || "";
+  });
 
 /* =========================
    MAIN
@@ -258,13 +294,20 @@ function render(snapshot) {
 
   const capital = compute(data);
 
+  // 🔥 joueur en forme
+  document.getElementById("hotPlayer").innerText = getHotPlayer(data);
+
+  // 💰 pot total
+  const pot = Object.values(capital).reduce((a, b) => a + b, 0);
+  document.getElementById("potValue").innerText = pot + "€";
+
   renderRanking(capital);
   renderTable(data);
   renderChart(data);
 }
 
 /* =========================
-   FIRESTORE
+   FIREBASE
 ========================= */
 db.collection("days").onSnapshot(render);
 
